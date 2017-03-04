@@ -11,6 +11,16 @@ begin
 	EXECUTE IMMEDIATE 'DROP TABLE   "Business_entity" CASCADE CONSTRAINTS';
 	EXECUTE IMMEDIATE 'DROP TABLE   "Sentiment_lookup_domain" CASCADE CONSTRAINTS';
 	
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "business_entity_type_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_snapshot_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_type_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "country_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_lookup_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "client_status_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "client_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "business_entity_seq"';
+	EXECUTE IMMEDIATE 'DROP SEQUENCE "Sentiment_lookup_domain_seq"';
+	
 	EXCEPTION WHEN OTHERS THEN NULL;
 end;
 
@@ -260,12 +270,6 @@ CREATE SEQUENCE Sentiment_lookup_domain_seq
  NOMAXVALUE
  NOCACHE
  NOCYCLE;
-
-
-
-
-
-
 		
 	
 	
