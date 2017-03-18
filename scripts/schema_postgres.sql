@@ -46,12 +46,23 @@ CREATE TABLE lookup_entity
 	CONSTRAINT pk_lookup_entity PRIMARY KEY (id)
 );
 
-CREATE TABLE lookup_domain
+CREATE TABLE lookup_domain_type
 (
 	code SMALLINT NOT NULL,
 	name VARCHAR(150) NOT NULL,
 
-	CONSTRAINT pk_sentiment_lookup_domain PRIMARY KEY (code)
+	CONSTRAINT pk_lookup_domain_type PRIMARY KEY (code)
+);
+
+CREATE TABLE lookup_domain
+(
+	code SMALLINT NOT NULL,
+	name VARCHAR(150) NOT NULL,
+	active BOOLEAN DEFAULT TRUE NOT NULL,
+
+	lookup_domain_type_code SMALLINT NOT NULL,
+
+	CONSTRAINT pk_lookup_domain PRIMARY KEY (code)
 );
 
 CREATE TABLE sentiment_type
@@ -88,7 +99,7 @@ ALTER TABLE lookup
 ADD CONSTRAINT fk_lookup_lookup_entity
 	FOREIGN KEY (lookup_entity_id)
 		REFERENCES lookup_entity(id);
-		
+
 -------------
 
 ALTER TABLE sentiment_snapshot
@@ -105,8 +116,13 @@ ALTER TABLE sentiment_snapshot
 ADD CONSTRAINT fk_lookup_snapshot_sentiment_type
 FOREIGN KEY (sentiment_type_code)
 	REFERENCES sentiment_type (code);
-	
+
 -------------
+
+ALTER TABLE lookup_domain
+ADD CONSTRAINT fk_lookup_domain_lookup_domain_type
+FOREIGN KEY (lookup_domain_type_code)
+	REFERENCES lookup_domain_type (code);
 
 ------------------------------------------------------------------------------
  
@@ -130,8 +146,13 @@ VALUES (3, 'Complete');
 
 -------------
 
-INSERT INTO lookup_domain (code, name)
-VALUES (1, 'Google');
+INSERT INTO lookup_domain_type (code, name)
+VALUES (1, 'Search Engine');
+
+-------------
+
+INSERT INTO lookup_domain (code, name, active, lookup_domain_type_code)
+VALUES (1, 'Google', TRUE, 1);
 
 -------------
 
