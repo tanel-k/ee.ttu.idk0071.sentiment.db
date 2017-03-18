@@ -29,7 +29,6 @@ CREATE TABLE sentiment_snapshot
 	url VARCHAR(1000) NOT NULL,
 	title VARCHAR(255) NOT NULL,
 	date TIMESTAMP(6) NOT NULL,
-	rank SMALLINT NOT NULL,
 	trust_level FLOAT(50) NOT NULL,
 
 	lookup_id BIGINT NOT NULL,
