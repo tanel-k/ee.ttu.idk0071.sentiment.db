@@ -3,7 +3,8 @@
 DROP TABLE IF EXISTS sentiment_snapshot CASCADE;
 DROP TABLE IF EXISTS lookup CASCADE;
 DROP TABLE IF EXISTS lookup_entity CASCADE;
-DROP TABLE IF EXISTS lookup_domain CASCADE;
+DROP TABLE IF EXISTS domain CASCADE;
+DROP TABLE IF EXISTS domain_type CASCADE;
 DROP TABLE IF EXISTS sentiment_type CASCADE;
 DROP TABLE IF EXISTS lookup_state CASCADE;
 
@@ -23,16 +24,23 @@ CREATE TABLE lookup
 	CONSTRAINT pk_lookup PRIMARY KEY (id)
 );
 
+CREATE TABLE domain_lookup
+(
+	id BIGSERIAL NOT NULL,
+
+	lookup_id BIGINT NOT NULL,
+	domain_code SMALLINT NOT NULL,
+
+	CONSTRAINT pk_domain_lookup PRIMARY KEY (id)
+);
+
 CREATE TABLE sentiment_snapshot
 (
 	id BIGSERIAL NOT NULL,
-	url VARCHAR(1000) NOT NULL,
-	title VARCHAR(255) NOT NULL,
-	date TIMESTAMP(6) NOT NULL,
+	source VARCHAR(1000) NOT NULL,
 	trust_level FLOAT(50) NOT NULL,
 
-	lookup_id BIGINT NOT NULL,
-	lookup_domain_code SMALLINT NOT NULL,
+	domain_lookup_id BIGINT NOT NULL,
 	sentiment_type_code CHAR(3) NOT NULL,
 
 	CONSTRAINT pk_sentiment_snapshot PRIMARY KEY (id)
@@ -46,23 +54,23 @@ CREATE TABLE lookup_entity
 	CONSTRAINT pk_lookup_entity PRIMARY KEY (id)
 );
 
-CREATE TABLE lookup_domain_type
+CREATE TABLE domain_type
 (
 	code SMALLINT NOT NULL,
 	name VARCHAR(150) NOT NULL,
 
-	CONSTRAINT pk_lookup_domain_type PRIMARY KEY (code)
+	CONSTRAINT pk_domain_type PRIMARY KEY (code)
 );
 
-CREATE TABLE lookup_domain
+CREATE TABLE domain
 (
 	code SMALLINT NOT NULL,
 	name VARCHAR(150) NOT NULL,
 	active BOOLEAN DEFAULT TRUE NOT NULL,
 
-	lookup_domain_type_code SMALLINT NOT NULL,
+	domain_type_code SMALLINT NOT NULL,
 
-	CONSTRAINT pk_lookup_domain PRIMARY KEY (code)
+	CONSTRAINT pk_domain PRIMARY KEY (code)
 );
 
 CREATE TABLE sentiment_type
@@ -102,15 +110,17 @@ ADD CONSTRAINT fk_lookup_lookup_entity
 
 -------------
 
-ALTER TABLE sentiment_snapshot
-ADD CONSTRAINT fk_lookup_snapshot_lookup
-FOREIGN KEY (lookup_id)
-	REFERENCES lookup (id);
+ALTER TABLE domain_lookup
+ADD CONSTRAINT fk_domain_lookup_domain
+FOREIGN KEY (domain_code)
+	REFERENCES domain (code);
+
+-------------
 
 ALTER TABLE sentiment_snapshot
-ADD CONSTRAINT fk_lookup_snapshot_lookup_domain
-FOREIGN KEY (lookup_domain_code)
-	REFERENCES lookup_domain (code);
+ADD CONSTRAINT fk_lookup_snapshot_domain_lookup
+FOREIGN KEY (domain_lookup_id)
+	REFERENCES domain_lookup (id);
 
 ALTER TABLE sentiment_snapshot
 ADD CONSTRAINT fk_lookup_snapshot_sentiment_type
@@ -119,10 +129,10 @@ FOREIGN KEY (sentiment_type_code)
 
 -------------
 
-ALTER TABLE lookup_domain
-ADD CONSTRAINT fk_lookup_domain_lookup_domain_type
-FOREIGN KEY (lookup_domain_type_code)
-	REFERENCES lookup_domain_type (code);
+ALTER TABLE domain
+ADD CONSTRAINT fk_domain_domain_type
+FOREIGN KEY (domain_type_code)
+	REFERENCES domain_type (code);
 
 ------------------------------------------------------------------------------
  
@@ -146,13 +156,28 @@ VALUES (3, 'Complete');
 
 -------------
 
-INSERT INTO lookup_domain_type (code, name)
+INSERT INTO domain_type (code, name)
 VALUES (1, 'Search Engine');
+
+INSERT INTO domain_type (code, name)
+VALUES (2, 'Social Media');
 
 -------------
 
-INSERT INTO lookup_domain (code, name, active, lookup_domain_type_code)
+INSERT INTO domain (code, name, active, domain_type_code)
 VALUES (1, 'Google', TRUE, 1);
+
+INSERT INTO domain (code, name, active domain_type_code)
+VALUES (2, 'Bing', TRUE, 1);
+
+INSERT INTO domain (code, name, active domain_type_code)
+VALUES (3, 'Yahoo', TRUE, 1);
+
+INSERT INTO domain (code, name, active domain_type_code)
+VALUES (4, 'Facebook', TRUE, 2);
+
+INSERT INTO domain (code, name, active domain_type_code)
+VALUES (5, 'Twitter', TRUE, 2);
 
 -------------
 
