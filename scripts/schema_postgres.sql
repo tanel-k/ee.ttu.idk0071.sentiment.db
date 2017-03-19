@@ -1,6 +1,5 @@
 /* Drop Tables */
 
-DROP TABLE IF EXISTS sentiment_snapshot CASCADE;
 DROP TABLE IF EXISTS lookup CASCADE;
 DROP TABLE IF EXISTS lookup_entity CASCADE;
 DROP TABLE IF EXISTS domain CASCADE;
@@ -28,22 +27,19 @@ CREATE TABLE domain_lookup
 (
 	id BIGSERIAL NOT NULL,
 
+	negative_cnt BIGINT,
+	neutral_cnt BIGINT,
+	positive_cnt BIGINT,
+
+	negative_qty DOUBLE,
+	positive_qty DOUBLE,
+	neutral_qty DOUBLE,
+
 	lookup_id BIGINT NOT NULL,
 	domain_code SMALLINT NOT NULL,
+	sentiment_type_code CHAR(3),
 
 	CONSTRAINT pk_domain_lookup PRIMARY KEY (id)
-);
-
-CREATE TABLE sentiment_snapshot
-(
-	id BIGSERIAL NOT NULL,
-	source VARCHAR(1000) NOT NULL,
-	trust_level FLOAT(50) NOT NULL,
-
-	domain_lookup_id BIGINT NOT NULL,
-	sentiment_type_code CHAR(3) NOT NULL,
-
-	CONSTRAINT pk_sentiment_snapshot PRIMARY KEY (id)
 );
 
 CREATE TABLE lookup_entity
@@ -115,15 +111,8 @@ ADD CONSTRAINT fk_domain_lookup_domain
 FOREIGN KEY (domain_code)
 	REFERENCES domain (code);
 
--------------
-
-ALTER TABLE sentiment_snapshot
-ADD CONSTRAINT fk_lookup_snapshot_domain_lookup
-FOREIGN KEY (domain_lookup_id)
-	REFERENCES domain_lookup (id);
-
-ALTER TABLE sentiment_snapshot
-ADD CONSTRAINT fk_lookup_snapshot_sentiment_type
+ALTER TABLE domain_lookup
+ADD CONSTRAINT fk_domain_lookup_sentiment_type
 FOREIGN KEY (sentiment_type_code)
 	REFERENCES sentiment_type (code);
 
