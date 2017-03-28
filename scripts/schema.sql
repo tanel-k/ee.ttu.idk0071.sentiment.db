@@ -1,186 +1,152 @@
 /* Drop Tables */
 
-begin
-	EXECUTE IMMEDIATE 'DROP TABLE   "Sentiment_snapshot" CASCADE CONSTRAINTS';
-	EXECUTE IMMEDIATE 'DROP TABLE   "Sentiment_type" CASCADE CONSTRAINTS';
-	EXECUTE IMMEDIATE 'DROP TABLE   "Sentiment_lookup" CASCADE CONSTRAINTS';
-	EXECUTE IMMEDIATE 'DROP TABLE   "Sentiment_lookup_domain" CASCADE CONSTRAINTS';
-	EXECUTE IMMEDIATE 'DROP TABLE   "Sentiment_lookup_status" CASCADE CONSTRAINTS';
-	EXECUTE IMMEDIATE 'DROP TABLE   "Sentiment_lookup" CASCADE CONSTRAINTS';
-	
-	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_snapshot_seq"';
-	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_type_seq"';
-	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_lookup_seq"';
-	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_lookup_domain_seq"';
-	EXECUTE IMMEDIATE 'DROP SEQUENCE "sentiment_lookup_status_seq"';
-	EXECUTE IMMEDIATE 'DROP SEQUENCE "business_entity_seq"';
-	
-	EXCEPTION WHEN OTHERS THEN NULL;
-end;
-
-
+DROP TABLE IF EXISTS lookup CASCADE;
+DROP TABLE IF EXISTS lookup_entity CASCADE;
+DROP TABLE IF EXISTS domain CASCADE;
+DROP TABLE IF EXISTS domain_type CASCADE;
+DROP TABLE IF EXISTS domain_lookup CASCADE;
+DROP TABLE IF EXISTS domain_lookup_state CASCADE;
 
 --------------------------------------------------------------------------------
 
 /* Create Tables */
 
-CREATE TABLE  "Sentiment_snapshot"
-(	"SENTIMENT_SNAPSHOT_ID" NUMBER(8,2) NOT NULL,
-	"LOOKUP_ID" NUMBER(8,2) NOT NULL,
-	"URL" VARCHAR2(1000) NOT NULL,
-	"TITLE" VARCHAR2(255) NOT NULL,
-	"SNAPSHOT_DATETIME" TIMESTAMP(6) NOT NULL,
-	"SENTIMENT_SNAPSHOT_RANK" NUMBER(8,2) NOT NULL,
-	"SENTIMENT_LOOKUP_DOMAIN_CODE" NUMBER(8,2) NULL,
-	"TRUST_LEVEL" FLOAT(50) NOT NULL,
-	"SENTIMENT_TYPE_CODE" CHAR(3) NULL);
+CREATE TABLE lookup
+(
+	id BIGSERIAL NOT NULL,
+	lookup_entity_id BIGINT NOT NULL,
+	date TIMESTAMP(6) NOT NULL,
 
-CREATE TABLE  "Sentiment_type"
-(	"SENTIMENT_TYPE_CODE" CHAR(3) DEFAULT NEU NOT NULL,    -- Values: NEU, POS, NEG
-	"SENTIMENT_TYPE_NAME" VARCHAR2(150) NULL);
-	
-CREATE TABLE  "Sentiment_lookup"
-(	"LOOKUP_ID" NUMBER(8,2) NOT NULL,
-	"LOOKUP_DATETIME" TIMESTAMP(6) NOT NULL,
-	"SENTIMENT_TYPE_CODE" CHAR(3) NULL,
-	"SENTIMENT_LOOKUP_STATUS_CODE" NUMBER(8,2) NOT NULL,
-	"BUSINESS_ENTITY_ID" NUMBER(8,2) NULL);
+	CONSTRAINT pk_lookup PRIMARY KEY (id)
+);
 
-CREATE TABLE  "Sentiment_lookup_domain"
-(	"SENTIMENT_LOOKUP_DOMAIN_CODE" NUMBER(8,2) NOT NULL,
-	"SENTIMENT_LOOKUP_DOMAIN_NAME" VARCHAR2(150) NOT NULL);	
-	
-CREATE TABLE  "Sentiment_lookup_status"
-(	"SENTIMENT_LOOKUP_STATUS_CODE" NUMBER(8,2) NOT NULL,
-	"SENTIMENT_LOOKUP_STATUS_NAME" VARCHAR2(150) NOT NULL);
-	
+CREATE TABLE domain_lookup
+(
+	id BIGSERIAL NOT NULL,
+
+	negative_count BIGINT,
+	neutral_count BIGINT,
+	positive_count BIGINT,
+
+	domain_lookup_state_code SMALLINT NOT NULL,
+	lookup_id BIGINT NOT NULL,
+	domain_code SMALLINT NOT NULL,
+
+	CONSTRAINT pk_domain_lookup PRIMARY KEY (id)
+);
+
+CREATE TABLE lookup_entity
+(
+	id BIGSERIAL NOT NULL,
+	name VARCHAR(255) NOT NULL,
+
+	CONSTRAINT pk_lookup_entity PRIMARY KEY (id)
+);
+
+CREATE TABLE domain_type
+(
+	code SMALLINT NOT NULL,
+	name VARCHAR(150) NOT NULL,
+
+	CONSTRAINT pk_domain_type PRIMARY KEY (code)
+);
+
+CREATE TABLE domain
+(
+	code SMALLINT NOT NULL,
+	name VARCHAR(150) NOT NULL,
+	active BOOLEAN DEFAULT TRUE NOT NULL,
+
+	domain_type_code SMALLINT NOT NULL,
+
+	CONSTRAINT pk_domain PRIMARY KEY (code)
+);
+
+CREATE TABLE domain_lookup_state
+(
+	code SMALLINT NOT NULL,
+	name VARCHAR(150) NOT NULL,
+
+	CONSTRAINT pk_lookup_state PRIMARY KEY (code)
+);
+
 --------------------------------------------------------------------------------
-
-/* Create Primary Keys, Indexes, Uniques, Checks, Triggers */
-
-ALTER TABLE  "Sentiment_snapshot" 
- ADD CONSTRAINT "PK_SENTIMENT_SNAPSHOT"
-	PRIMARY KEY ("SENTIMENT_SNAPSHOT_ID") 
- USING INDEX;
-
-CREATE INDEX "IXFK_SENTIMENT_SNAPSHOT_SENTIMENT_LOOKUP"   
- ON  "Sentiment_snapshot" ("LOOKUP_ID") ;
-
-CREATE INDEX "IXFK_SENTIMENT_SNAPSHOT_SENTIMENT_LOOKUP_DOMAIN"   
- ON  "Sentiment_snapshot" ("SENTIMENT_LOOKUP_DOMAIN_CODE");
-
-CREATE INDEX "IXFK_SENTIMENT_SNAPSHOT_SENTIMENT_TYPE"   
- ON  "Sentiment_snapshot" ("SENTIMENT_TYPE_CODE") ;
- -----------
-
-ALTER TABLE  "Sentiment_type" 
- ADD CONSTRAINT "PK_SENTIMENT_TYPE"
-	PRIMARY KEY ("SENTIMENT_TYPE_CODE") 
- USING INDEX;
- -----------
- 
-ALTER TABLE  "Sentiment_lookup" 
- ADD CONSTRAINT "PK_SENTIMENT_LOOKUP "
-	PRIMARY KEY ("LOOKUP_ID") 
- USING INDEX;
-
-CREATE INDEX "IXFK_Sentiment_lo_Busines01"   
- ON  "Sentiment_lookup" ("BUSINESS_ENTITY_ID") ;
-
-CREATE INDEX "IXFK_Sentiment_lo_Sentime01"   
- ON  "Sentiment_lookup" ("SENTIMENT_LOOKUP_STATUS_CODE") ;
-
-CREATE INDEX "IXFK_SENTIMENT_LOOKUP_SENTIMENT_TYPE"   
- ON  "Sentiment_lookup" ("SENTIMENT_TYPE_CODE") ;
- -----------
- 
- ALTER TABLE  "Sentiment_lookup_domain" 
- ADD CONSTRAINT "PK_SENTIMENT_LOOKUP_DOMAIN"
-	PRIMARY KEY ("SENTIMENT_LOOKUP_DOMAIN_CODE") 
- USING INDEX;
- -----------
- 
- ALTER TABLE  "Sentiment_lookup_status" 
- ADD CONSTRAINT "PK_SENTIMENT_LOOKUP_STATUS_CODE"
-	PRIMARY KEY ("SENTIMENT_LOOKUP_STATUS_CODE") 
- USING INDEX;
- 
------------------------------------------------------------------------------- 
  
 /* Create Foreign Key Constraints */
 
-ALTER TABLE  "Sentiment_snapshot" 
- ADD CONSTRAINT "FK_SENTIMENT_SNAPSHOT_SENTIMENT_LOOKUP"
-	FOREIGN KEY ("LOOKUP_ID") REFERENCES  "Sentiment_lookup" ("LOOKUP_ID");
+ALTER TABLE domain_lookup
+ADD CONSTRAINT fk_domain_lookup_domain_lookup_state
+FOREIGN KEY (domain_lookup_state_code)
+	REFERENCES domain_lookup_state (code);
 
-ALTER TABLE  "Sentiment_snapshot" 
- ADD CONSTRAINT "FK_SENTIMENT_SNAPSHOT_SENTIMENT_LOOKUP_DOMAIN"
-	FOREIGN KEY ("SENTIMENT_LOOKUP_DOMAIN_CODE") 
-		REFERENCES  "Sentiment_lookup_domain" ("SENTIMENT_LOOKUP_DOMAIN_CODE");
- ------------
+ALTER TABLE lookup
+ADD CONSTRAINT fk_lookup_lookup_entity
+	FOREIGN KEY (lookup_entity_id)
+		REFERENCES lookup_entity(id);
 
-ALTER TABLE  "Sentiment_lookup" 
- ADD CONSTRAINT "FK_SENTIMENT_LOOKUP_BUSINESS_ENTITY_ID"
-	FOREIGN KEY ("BUSINESS_ENTITY_ID") 
-		REFERENCES  "Business_entity" ("BUSINESS_ENTITY_ID");
+-------------
 
-ALTER TABLE  "Sentiment_lookup" 
- ADD CONSTRAINT "FK_SENTIMENT_LOOKUP_SENTIMENT_STATUS_CODE"
-	FOREIGN KEY ("SENTIMENT_LOOKUP_STATUS_CODE") 
-		REFERENCES  "Sentiment_lookup_status" ("SENTIMENT_LOOKUP_STATUS_CODE");
+ALTER TABLE domain_lookup
+ADD CONSTRAINT fk_domain_lookup_domain
+FOREIGN KEY (domain_code)
+	REFERENCES domain (code);
 
-ALTER TABLE  "Sentiment_lookup" 
- ADD CONSTRAINT "FK_SENTIMENT_LOOKUP_SENTIMENT_TYPE"
-	FOREIGN KEY ("SENTIMENT_TYPE_CODE") 
-		REFERENCES  "Sentiment_type" ("SENTIMENT_TYPE_CODE");
- -------------
+-------------
+
+ALTER TABLE domain
+ADD CONSTRAINT fk_domain_domain_type
+FOREIGN KEY (domain_type_code)
+	REFERENCES domain_type (code);
+
+------------------------------------------------------------------------------
+ 
+
+/* Create Indexes, Uniques, Checks, Triggers */
+
+-- TODO: Margus
+
+---------------------------------------------------------------------------	
+
+/* Classifier values */
+
+INSERT INTO domain_lookup_state (code, name)
+VALUES (1, 'Queued');
+
+INSERT INTO domain_lookup_state(code, name)
+VALUES (2, 'In progress');
+
+INSERT INTO domain_lookup_state(code, name)
+VALUES (3, 'Complete');
+
+INSERT INTO domain_lookup_state(code, name)
+VALUES (4, 'Error');
+
+-------------
+
+INSERT INTO domain_type (code, name)
+VALUES (1, 'Search Engine');
+
+INSERT INTO domain_type (code, name)
+VALUES (2, 'Social Media');
+
+-------------
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (1, 'Google', TRUE, 1);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (2, 'Bing', TRUE, 1);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (3, 'Yahoo', TRUE, 1);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (4, 'Facebook', TRUE, 2);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (5, 'Twitter', TRUE, 2);
+
+-------------
 
 ---------------------------------------------------------------------------
 
-/* Create Sequences */
-
-CREATE SEQUENCE sentiment_snapshot_seq
- START WITH     1000
- INCREMENT BY   1
- NOMAXVALUE
- NOCACHE
- NOCYCLE;
- 
-CREATE SEQUENCE sentiment_type_seq
- START WITH     1000
- INCREMENT BY   1
- NOMAXVALUE
- NOCACHE
- NOCYCLE;
- 
-CREATE SEQUENCE sentiment_lookup_seq
- START WITH     1000
- INCREMENT BY   1
- NOMAXVALUE
- NOCACHE
- NOCYCLE;
- 
-CREATE SEQUENCE sentiment_lookup_domain_seq
- START WITH     1000
- INCREMENT BY   1
- NOMAXVALUE
- NOCACHE
- NOCYCLE;
- 
-CREATE SEQUENCE sentiment_lookup_status_seq
- START WITH     1000
- INCREMENT BY   1
- NOMAXVALUE
- NOCACHE
- NOCYCLE;
- 
- CREATE SEQUENCE business_entity_seq
- START WITH     1000
- INCREMENT BY   1
- NOMAXVALUE
- NOCACHE
- NOCYCLE;
-		
-	
-	
-	
