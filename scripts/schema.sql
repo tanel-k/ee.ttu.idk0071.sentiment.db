@@ -16,6 +16,7 @@ CREATE TABLE lookup
 	id BIGSERIAL NOT NULL,
 	lookup_entity_id BIGINT NOT NULL,
 	date TIMESTAMP(6) NOT NULL,
+	email VARCHAR(255) NULL,
 
 	CONSTRAINT pk_lookup PRIMARY KEY (id)
 );
