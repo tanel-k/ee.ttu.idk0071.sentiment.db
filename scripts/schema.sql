@@ -27,8 +27,11 @@ CREATE TABLE domain_lookup
 	negative_count BIGINT,
 	neutral_count BIGINT,
 	positive_count BIGINT,
-	negativity_score REAL,
-	
+
+	negativity_percentage REAL,
+	neutrality_percentage REAL,
+	positivity_percentage REAL,
+
 	domain_lookup_state_code SMALLINT NOT NULL,
 	lookup_id BIGINT NOT NULL,
 	domain_code SMALLINT NOT NULL,
