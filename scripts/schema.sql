@@ -134,6 +134,9 @@ VALUES (1, 'Search Engine');
 INSERT INTO domain_type (code, name)
 VALUES (2, 'Social Media');
 
+INSERT INTO domain_type (code, name) 
+values (3, 'Message Board');
+
 -------------
 
 INSERT INTO domain (code, name, active, domain_type_code)
