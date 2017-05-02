@@ -1,5 +1,5 @@
 /* Drop Tables */
-
+DROP VIEW IF EXISTS domain_lookup_average_duration;
 DROP TABLE IF EXISTS lookup CASCADE;
 DROP TABLE IF EXISTS lookup_entity CASCADE;
 DROP TABLE IF EXISTS domain CASCADE;
@@ -24,6 +24,9 @@ CREATE TABLE lookup
 CREATE TABLE domain_lookup
 (
 	id BIGSERIAL NOT NULL,
+
+	submitted_date TIMESTAMP(6) NOT NULL,
+	completed_date TIMESTAMP(6),
 
 	negative_count BIGINT,
 	neutral_count BIGINT,
@@ -73,6 +76,26 @@ CREATE TABLE domain_lookup_state
 	name VARCHAR(150) NOT NULL,
 
 	CONSTRAINT pk_lookup_state PRIMARY KEY (code)
+);
+
+CREATE OR REPLACE VIEW domain_lookup_average_duration
+AS (
+    WITH domains_with_averages AS
+     (SELECT dl_duration.code, dl_duration.name, round(AVG(dl_duration.duration_hours), 2) AS average_duration_hours
+        FROM (
+            SELECT domain.code, domain.name, round((EXTRACT(epoch FROM domain_lookup.completed_date - domain_lookup.submitted_date) / 3600)::numeric, 2) AS duration_hours
+            FROM domain INNER JOIN domain_lookup
+                ON domain.code = domain_lookup.domain_code
+            WHERE submitted_date IS NOT NULL
+                AND completed_date IS NOT NULL
+                AND domain_lookup.domain_lookup_state_code = 3
+        ) AS dl_duration
+        GROUP BY (dl_duration.code, dl_duration.name))
+    SELECT * 
+    FROM domains_with_averages
+    UNION
+    SELECT domain.code, domain.name, NULL AS average_duration_hours
+    FROM domain WHERE domain.code NOT IN (SELECT code FROM domains_with_averages)
 );
 
 --------------------------------------------------------------------------------
