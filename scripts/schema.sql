@@ -81,9 +81,9 @@ CREATE TABLE domain_lookup_state
 CREATE OR REPLACE VIEW domain_lookup_average_duration
 AS (
     WITH domains_with_averages AS
-     (SELECT dl_duration.code, dl_duration.name, round(AVG(dl_duration.duration_hours), 2) AS average_duration_hours
+     (SELECT dl_duration.code, dl_duration.name, round(AVG(dl_duration.duration_minutes))::integer AS average_duration_minutes
         FROM (
-            SELECT domain.code, domain.name, round((EXTRACT(epoch FROM domain_lookup.completed_date - domain_lookup.submitted_date) / 3600)::numeric, 2) AS duration_hours
+            SELECT domain.code, domain.name, round((EXTRACT(epoch FROM domain_lookup.completed_date - domain_lookup.submitted_date) / 60)::numeric) AS duration_minutes
             FROM domain INNER JOIN domain_lookup
                 ON domain.code = domain_lookup.domain_code
             WHERE submitted_date IS NOT NULL
