@@ -158,7 +158,7 @@ INSERT INTO domain_type (code, name)
 VALUES (2, 'Social Media');
 
 INSERT INTO domain_type (code, name) 
-values (3, 'Message Board');
+VALUES (3, 'Message Board');
 
 -------------
 
@@ -172,10 +172,22 @@ INSERT INTO domain (code, name, active, domain_type_code)
 VALUES (3, 'Yahoo', TRUE, 1);
 
 INSERT INTO domain (code, name, active, domain_type_code)
-VALUES (4, 'Facebook', TRUE, 2);
+VALUES (4, 'Facebook', FALSE, 2);
 
 INSERT INTO domain (code, name, active, domain_type_code)
 VALUES (5, 'Twitter', TRUE, 2);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (6, 'reddit', TRUE, 3);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (7, '4chan', TRUE, 3);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (8, 'tumblr', FALSE, 3);
+
+INSERT INTO domain (code, name, active, domain_type_code)
+VALUES (9, 'DuckDuckGo', FALSE, 1);
 
 -------------
 
