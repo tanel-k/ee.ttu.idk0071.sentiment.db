@@ -81,12 +81,13 @@ CREATE TABLE domain_lookup_state
 
 CREATE TABLE error_log
 (
-id BIGSERIAL NOT NULL,
-date TIMESTAMP(6) NOT NULL,
-source VARCHAR(400) NOT NULL,
-message VARCHAR(400) NOT NULL,
-stacktrace TEXT NOT NULL,
-CONSTRAINT pk_error_log PRIMARY KEY (id)
+	id BIGSERIAL NOT NULL,
+	date TIMESTAMP(6) NOT NULL,
+	source VARCHAR(400) NOT NULL,
+	message VARCHAR(400) NOT NULL,
+	stack_trace TEXT NOT NULL,
+
+	CONSTRAINT pk_error_log PRIMARY KEY (id)
 );
 
 CREATE OR REPLACE VIEW domain_lookup_average_duration
