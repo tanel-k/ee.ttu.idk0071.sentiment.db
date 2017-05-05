@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS domain CASCADE;
 DROP TABLE IF EXISTS domain_type CASCADE;
 DROP TABLE IF EXISTS domain_lookup CASCADE;
 DROP TABLE IF EXISTS domain_lookup_state CASCADE;
+DROP TABLE IF EXISTS error_log CASCADE;
 
 --------------------------------------------------------------------------------
 
@@ -76,6 +77,16 @@ CREATE TABLE domain_lookup_state
 	name VARCHAR(150) NOT NULL,
 
 	CONSTRAINT pk_lookup_state PRIMARY KEY (code)
+);
+
+CREATE TABLE error_log
+(
+id BIGSERIAL NOT NULL,
+date TIMESTAMP(6) NOT NULL,
+source VARCHAR(400) NOT NULL,
+message VARCHAR(400) NOT NULL,
+stacktrace TEXT NOT NULL,
+CONSTRAINT pk_error_log PRIMARY KEY (id)
 );
 
 CREATE OR REPLACE VIEW domain_lookup_average_duration
