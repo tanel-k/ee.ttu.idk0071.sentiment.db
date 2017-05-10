@@ -84,7 +84,7 @@ CREATE TABLE error_log
 	id BIGSERIAL NOT NULL,
 	date TIMESTAMP(6) NOT NULL,
 	source VARCHAR(400) NOT NULL,
-	message VARCHAR(400) NOT NULL,
+	message VARCHAR(400),
 	stack_trace TEXT NOT NULL,
 
 	CONSTRAINT pk_error_log PRIMARY KEY (id)
